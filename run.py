@@ -32,3 +32,8 @@ prob.model.add_subsystem('motor_mesh_group',group, promotes = ['*'])
 
 prob.setup()
 prob.run_model()
+
+import openmdao.api as om 
+
+n = 1
+
