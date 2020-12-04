@@ -15,9 +15,10 @@ asdf.addPoint(0,0,0,lc,1)
 asdf.addPoint(a,0,0,lc,2)
 asdf.addPoint(a,a,0,lc,3)
 asdf.addPoint(0,a,0,lc,4)
-asdf.addPoint(2*a,0,0,lc,5)
-asdf.addPoint(2*a,a,0,lc,6)
-
+asdf.addPoint(a,0,0,lc,5)
+asdf.addPoint(a,a,0,lc,6)
+asdf.addPoint(2*a,a,0,lc,7)
+asdf.addPoint(2*a,0,0,lc,8)
 # gmsh.model.occ.removeAllDuplicates()
 # gmsh.model.mesh.removeDuplicateNodes()
 
@@ -26,10 +27,10 @@ asdf.addLine(2,3,2)
 asdf.addLine(3,4,3)
 asdf.addLine(4,1,4)
 
-asdf.addLine(2,5,5)
-asdf.addLine(5,6,6)
-asdf.addLine(6,3,7)
-aaa = asdf.addLine(3,2,8)
+asdf.addLine(5,6,5)
+asdf.addLine(6,7,6)
+asdf.addLine(7,8,7)
+aaa = asdf.addLine(8,5,8)
 
 # gmsh.model.occ.removeAllDuplicates()
 
