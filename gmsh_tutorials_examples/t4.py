@@ -40,7 +40,7 @@ ssin = math.sqrt(1 - ccos * ccos)
 
 # We start by defining some points and some lines. To make the code shorter we
 # can redefine a namespace:
-factory = gmsh.model.geo
+factory = gmsh.model.occ
 factory.addPoint(-e1 - e2, 0, 0, Lc1, 1)
 factory.addPoint(-e1 - e2, h1, 0, Lc1, 2)
 factory.addPoint(-e3 - r, h1, 0, Lc2, 3)

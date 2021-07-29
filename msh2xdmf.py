@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#!/usr/bin/env python
 
 import argparse
 import meshio
@@ -52,8 +52,8 @@ def export_domain(msh, dim, directory, prefix):
         meshio.CellBlock(
             type=cell_type,
             data=data,
-            )
-        ]
+        )
+    ]
     # Generate the domain cells data (for the subdomains)
     try:
         cell_data = {
@@ -63,10 +63,10 @@ def export_domain(msh, dim, directory, prefix):
                         msh.cell_data["gmsh:physical"][i]
                         for i, cellBlock in enumerate(msh.cells)
                         if cellBlock.type == cell_type
-                        ]
-                    )
-                ]
-            }
+                    ]
+                )
+            ]
+        }
     except KeyError:
         raise ValueError(
             """
@@ -75,7 +75,7 @@ def export_domain(msh, dim, directory, prefix):
                 - if dim=2, the domain is a surface
                 - if dim=3, the domain is a volume
             """
-            )
+        )
 
     # Generate a meshio Mesh for the domain
     domain = meshio.Mesh(
@@ -88,7 +88,7 @@ def export_domain(msh, dim, directory, prefix):
         "{}/{}_{}".format(directory, prefix, "domain.xdmf"),
         domain,
         file_format="xdmf"
-        )
+    )
 
 
 def export_boundaries(msh, dim, directory, prefix):
@@ -111,8 +111,8 @@ def export_boundaries(msh, dim, directory, prefix):
         meshio.CellBlock(
             type=cell_type,
             data=data,
-            )
-        ]
+        )
+    ]
     # Generate the boundaries cells data
     cell_data = {
         "boundaries": [
@@ -121,10 +121,10 @@ def export_boundaries(msh, dim, directory, prefix):
                     msh.cell_data["gmsh:physical"][i]
                     for i, cellBlock in enumerate(msh.cells)
                     if cellBlock.type == cell_type
-                    ]
-                )
-            ]
-        }
+                ]
+            )
+        ]
+    }
     # Generate the meshio Mesh for the boundaries physical groups
     boundaries = meshio.Mesh(
         points=msh.points[:, :dim],
@@ -136,7 +136,7 @@ def export_boundaries(msh, dim, directory, prefix):
         "{}/{}_{}".format(directory, prefix, "boundaries.xdmf"),
         boundaries,
         file_format="xdmf"
-        )
+    )
 
 
 def export_association_table(msh, prefix='mesh', directory='.', verbose=True):
@@ -163,14 +163,15 @@ def export_association_table(msh, prefix='mesh', directory='.', verbose=True):
         for i, array in enumerate(arrays):
             if array.size != 0:
                 index = i
-        # Get the value in cell_data for the corresponding array
-        value = msh.cell_data["gmsh:physical"][index][0]
-        # Store the association table in a dictionnary
-        association_table[label] = value
-
-        # Display the association
-        if verbose:
-            print(formatter.format(label, value))
+        # Added check to make sure that the association table
+        # doesn't try to import irrelevant information.
+        if label != "gmsh:bounding_entities":
+            value = msh.cell_data["gmsh:physical"][index][0]
+            # Store the association table in a dictionnary
+            association_table[label] = value
+            # Display the association
+            if verbose:
+                print(formatter.format(label, value))
     if verbose:
         print(topbot)
     # Export the association table
@@ -181,21 +182,21 @@ def export_association_table(msh, prefix='mesh', directory='.', verbose=True):
         file_content.write(f)
 
 
-def import_mesh_from_xdmf(
+def import_mesh(
         prefix="mesh",
         subdomains=False,
         dim=2,
         directory=".",
-        ):
-    """
-    Function importing a dolfin mesh.
+):
+    """Function importing a dolfin mesh.
 
     Arguments:
-        - domain (str): name of the domain XDMF file;
-        - boundaries (str): name of the boundaries XDMF file;
-        - dim (int): dimension of the domain;
-        - subdomains (bool): true if there are subdomains, else false
-        - directory (str): (optional) directory of the mesh;
+        prefix (str, optional): mesh files prefix (eg. my_mesh.msh,
+            my_mesh_domain.xdmf, my_mesh_bondaries.xdmf). Defaults to "mesh".
+        subdomains (bool, optional): True if there are subdomains. Defaults to
+            False.
+        dim (int, optional): dimension of the domain. Defaults to 2.
+        directory (str, optional): directory of the mesh files. Defaults to ".".
 
     Output:
         - dolfin Mesh object containing the domain;
@@ -206,6 +207,12 @@ def import_mesh_from_xdmf(
     # Set the file name
     domain = "{}_domain.xdmf".format(prefix)
     boundaries = "{}_boundaries.xdmf".format(prefix)
+
+    # create 2 xdmf files if not converted before
+    if not os.path.exists("{}/{}".format(directory, domain)) or \
+       not os.path.exists("{}/{}".format(directory, boundaries)):
+        msh2xdmf("{}.msh".format(prefix), dim=dim, directory=directory)
+
     # Import the converted domain
     mesh = Mesh()
     with XDMFFile("{}/{}".format(directory, domain)) as infile:
@@ -222,7 +229,8 @@ def import_mesh_from_xdmf(
             infile.read(subdomains_mvc, 'subdomains')
         subdomains_mf = MeshFunctionSizet(mesh, subdomains_mvc)
     # Import the association table
-    association_table_name = "{}/{}_{}".format(directory, prefix, "association_table.ini")
+    association_table_name = "{}/{}_{}".format(
+        directory, prefix, "association_table.ini")
     file_content = ConfigParser()
     file_content.read(association_table_name)
     association_table = dict(file_content["ASSOCIATION TABLE"])
@@ -242,14 +250,14 @@ if __name__ == "__main__":
         "msh_file",
         help="input .msh file",
         type=str,
-        )
+    )
     parser.add_argument(
         "-d",
         "--dimension",
         help="dimension of the domain",
         type=int,
         default=2,
-        )
+    )
     args = parser.parse_args()
     # Get current directory
     current_directory = os.getcwd()
